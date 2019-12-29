@@ -5,6 +5,29 @@ import (
 	"math/big"
 )
 
+func TestGet(t *testing.T) {
+	cases := []struct {
+		in Dictionary
+		want Element
+	}{
+		{ Dictionary { val: [][2]Element {
+			[2]Element {ByteString{ val: []byte("abe") }, ByteString { val: []byte("ef") } },
+			 } },
+			 ByteString { val: []byte("ef") } },
+
+	}
+	for _, c := range cases {
+		got, err := c.in.Get("abe")
+		if err != nil {
+			t.Errorf("element not present in Dictionary (%q) -> (%q)", c.in, c.want)
+			continue
+		}
+		if got.String() != c.want.String() {
+			t.Errorf("(%q).String() == %q, want %q", c.in, got, c.want)
+		}
+	}
+}
+
 func TestString(t *testing.T) {
 	cases := []struct {
 		in Element
@@ -14,8 +37,8 @@ func TestString(t *testing.T) {
 		{ Integer { val: big.NewInt(0) }, "0"},
 		{ Integer { val: big.NewInt(-10) }, "-10"},
 
-		{ ByteString { val: []byte{ 0x0f, 0xab, 0xfd } }, "\\X0fabfd"},
-		{ ByteString { val: []byte{  } }, "\\X"},
+		{ ByteString { val: []byte("Hello") }, "Hello"},
+		{ ByteString { val: []byte{  } }, ""},
 
 		{ List { val: []Element{ Integer{ val: big.NewInt(10) } }}, "{\n10\n}" },
 

@@ -1,9 +1,9 @@
 package bencode
 
 import (
-	"fmt"
 	"math/big"
 	"strconv"
+	"io/ioutil"
 )
 
 
@@ -50,14 +50,29 @@ type Dictionary struct {
 //--------------------------------------------------------
 // INTERFACE FUNCTIONS
 //--------------------------------------------------------
+
+func (dic Dictionary) Get(val string) (Element, error) {
+	var res Element
+	for i := range dic.val {
+		if dic.val[i][0].String() == val {
+			return dic.val[i][1], nil
+		}
+	}
+	return res, BencodeError { msg: "key not present in Dictionary" }
+}
+
 func (elem Integer) String() string {
 	return elem.val.String()
 }
 
 func (elem ByteString) String() string {
-	res := "\\X"
+	res := ""
 	for _, val := range elem.val {
-		res += fmt.Sprintf("%02x", val)
+		if val >= 32 && val <= 126 {
+			res += string(val)
+		} else {
+			res += string(".")
+		}
 	}
 	return res
 }
@@ -107,6 +122,15 @@ func (elem Dictionary) Encode() []byte {
 		res = append(res, elem.val[i][1].Encode()...)
 	}
 	return append(res, []byte("e")...)
+}
+
+func FromFile(file string) (Element, error) {
+    dat, err := ioutil.ReadFile(file)
+	var res Element
+	if err != nil {
+		return res, BencodeError { msg: "unable to read from file" }
+	}
+	return D(dat)
 }
 
 func D(data []byte) (Element, error) {
