@@ -10,10 +10,10 @@ func TestGet(t *testing.T) {
 		in Dictionary
 		want Element
 	}{
-		{ Dictionary { val: [][2]Element {
-			[2]Element {ByteString{ val: []byte("abe") }, ByteString { val: []byte("ef") } },
+		{ Dictionary { Value: [][2]Element {
+			[2]Element {ByteString{ Value: []byte("abe") }, ByteString { Value: []byte("ef") } },
 			 } },
-			 ByteString { val: []byte("ef") } },
+			 ByteString { Value: []byte("ef") } },
 
 	}
 	for _, c := range cases {
@@ -33,16 +33,16 @@ func TestString(t *testing.T) {
 		in Element
 		want string
 	}{
-		{ Integer { val: big.NewInt(10) }, "10"},
-		{ Integer { val: big.NewInt(0) }, "0"},
-		{ Integer { val: big.NewInt(-10) }, "-10"},
+		{ Integer { Value: big.NewInt(10) }, "10"},
+		{ Integer { Value: big.NewInt(0) }, "0"},
+		{ Integer { Value: big.NewInt(-10) }, "-10"},
 
-		{ ByteString { val: []byte("Hello") }, "Hello"},
-		{ ByteString { val: []byte{  } }, ""},
+		{ ByteString { Value: []byte("Hello") }, "Hello"},
+		{ ByteString { Value: []byte{  } }, ""},
 
-		{ List { val: []Element{ Integer{ val: big.NewInt(10) } }}, "{\n10\n}" },
+		{ List { Value: []Element{ Integer{ Value: big.NewInt(10) } }}, "{\n10\n}" },
 
-		{ Dictionary { val: [][2]Element { } }, "{\n}" },
+		{ Dictionary { Value: [][2]Element { } }, "{\n}" },
 	}
 	for _, c := range cases {
 		got := c.in.String()
@@ -57,16 +57,16 @@ func TestEncode(t *testing.T) {
 		in Element
 		want []byte
 	}{
-		{ Integer { val: big.NewInt(10) }, []byte("i10e")},
-		{ Integer { val: big.NewInt(0) }, []byte("i0e")},
-		{ Integer { val: big.NewInt(-10) }, []byte("i-10e")},
+		{ Integer { Value: big.NewInt(10) }, []byte("i10e")},
+		{ Integer { Value: big.NewInt(0) }, []byte("i0e")},
+		{ Integer { Value: big.NewInt(-10) }, []byte("i-10e")},
 
-		{ ByteString { val: []byte("test")}, []byte("b4:teste")},
-		{ ByteString { val: []byte{  } }, []byte("b0:e")},
+		{ ByteString { Value: []byte("test")}, []byte("b4:teste")},
+		{ ByteString { Value: []byte{  } }, []byte("b0:e")},
 
-		{ List { val: []Element{ Integer{ val: big.NewInt(10) } }}, []byte("li10ee") },
+		{ List { Value: []Element{ Integer{ Value: big.NewInt(10) } }}, []byte("li10ee") },
 
-		{ Dictionary { val: [][2]Element{ } }, []byte("de") },
+		{ Dictionary { Value: [][2]Element{ } }, []byte("de") },
 	}
 	for _, c := range cases {
 		got := c.in.Encode()
@@ -81,23 +81,23 @@ func TestDecode(t *testing.T) {
 		in string
 		want Element
 	}{
-		{ "i10e", Integer{ val: big.NewInt(10) } },
-		{ "i-10e", Integer{ val: big.NewInt(-10) } },
-		{ "i0e", Integer{ val: big.NewInt(0) } },
+		{ "i10e", Integer{ Value: big.NewInt(10) } },
+		{ "i-10e", Integer{ Value: big.NewInt(-10) } },
+		{ "i0e", Integer{ Value: big.NewInt(0) } },
 
-		{ "0:", ByteString{ val: []byte{  } } },
-		{ "1:e", ByteString{ val: []byte("e") } },
-		{ "3:abe", ByteString{ val: []byte("abe") } },
+		{ "0:", ByteString{ Value: []byte{  } } },
+		{ "1:e", ByteString{ Value: []byte("e") } },
+		{ "3:abe", ByteString{ Value: []byte("abe") } },
 
-		{ "l3:abee", List { val: []Element { ByteString{ val: []byte("abe") } } } },
-		{ "l3:abei43ee", List { val: []Element { ByteString{ val: []byte("abe") },
-			Integer { val: big.NewInt(43) } } } },
-		{ "l3:abeli10eei43ee", List { val: []Element { ByteString{ val: []byte("abe") },
-			List { val: []Element { Integer { val: big.NewInt(10) } } },
-			Integer { val: big.NewInt(43) } } } },
+		{ "l3:abee", List { Value: []Element { ByteString{ Value: []byte("abe") } } } },
+		{ "l3:abei43ee", List { Value: []Element { ByteString{ Value: []byte("abe") },
+			Integer { Value: big.NewInt(43) } } } },
+		{ "l3:abeli10eei43ee", List { Value: []Element { ByteString{ Value: []byte("abe") },
+			List { Value: []Element { Integer { Value: big.NewInt(10) } } },
+			Integer { Value: big.NewInt(43) } } } },
 
-		{ "d3:abe2:efe", Dictionary { val: [][2]Element {
-			[2]Element {ByteString{ val: []byte("abe") }, ByteString { val: []byte("ef") } },
+		{ "d3:abe2:efe", Dictionary { Value: [][2]Element {
+			[2]Element {ByteString{ Value: []byte("abe") }, ByteString { Value: []byte("ef") } },
 			 } } },
 	}
 	for _, c := range cases {

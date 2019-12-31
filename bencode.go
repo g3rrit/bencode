@@ -32,42 +32,60 @@ type Element interface {
 // ELEMENT TYPES
 //--------------------------------------------------------
 type Integer struct {
-	val *big.Int
+	Value *big.Int
+}
+
+func NewInteger(val int) Integer {
+  return Integer { Value: big.NewInt(int64(val)) }
 }
 
 type ByteString struct {
-	val []byte
+	Value []byte
+}
+
+func newByteString(val []byte) ByteString {
+  return ByteString { Value: val }
 }
 
 type List struct {
-	val []Element
+	Value []Element
+}
+
+func newList(val []Element) List {
+  return List { Value: val }
 }
 
 type Dictionary struct {
-	val [][2]Element
+	Value [][2]Element
 }
 
-//--------------------------------------------------------
-// INTERFACE FUNCTIONS
-//--------------------------------------------------------
+func newDictionary(val [][2]Element) Dictionary {
+  return Dictionary { Value: val }
+}
 
 func (dic Dictionary) Get(val string) (Element, error) {
 	var res Element
-	for i := range dic.val {
-		if dic.val[i][0].String() == val {
-			return dic.val[i][1], nil
+	for i := range dic.Value {
+		if dic.Value[i][0].String() == val {
+			return dic.Value[i][1], nil
 		}
 	}
 	return res, BencodeError { msg: "key not present in Dictionary" }
 }
 
+
+
+//--------------------------------------------------------
+// INTERFACE FUNCTIONS
+//--------------------------------------------------------
+
 func (elem Integer) String() string {
-	return elem.val.String()
+	return elem.Value.String()
 }
 
 func (elem ByteString) String() string {
 	res := ""
-	for _, val := range elem.val {
+	for _, val := range elem.Value {
 		if val >= 32 && val <= 126 {
 			res += string(val)
 		} else {
@@ -79,8 +97,8 @@ func (elem ByteString) String() string {
 
 func (elem List) String() string {
 	res := "{\n"
-	for i := range elem.val {
-		res += elem.val[i].String() + "\n"
+	for i := range elem.Value {
+		res += elem.Value[i].String() + "\n"
 	}
 	res += "}"
 	return res
@@ -88,8 +106,8 @@ func (elem List) String() string {
 
 func (elem Dictionary) String() string {
 	res := "{\n"
-	for i := range elem.val {
-		res += elem.val[i][0].String() + " => " + elem.val[i][1].String() + "\n"
+	for i := range elem.Value {
+		res += elem.Value[i][0].String() + " => " + elem.Value[i][1].String() + "\n"
 	}
 	res += "}"
 	return res
@@ -101,25 +119,25 @@ func (elem Integer) Encode() []byte {
 }
 
 func (elem ByteString) Encode() []byte {
-	res := append([]byte("b"), []byte(strconv.Itoa(len(elem.val)))...)
+	res := append([]byte("b"), []byte(strconv.Itoa(len(elem.Value)))...)
 	res = append(res, []byte(":")...)
-	res = append(res, elem.val...)
+	res = append(res, elem.Value...)
 	return append(res, []byte("e")...)
 }
 
 func (elem List) Encode() []byte {
 	res := []byte("l")
-	for i := range elem.val {
-		res = append(res, elem.val[i].Encode()...)
+	for i := range elem.Value {
+		res = append(res, elem.Value[i].Encode()...)
 	}
 	return append(res, []byte("e")...)
 }
 
 func (elem Dictionary) Encode() []byte {
 	res := []byte("d")
-	for i := range elem.val {
-		res = append(res, elem.val[i][0].Encode()...)
-		res = append(res, elem.val[i][1].Encode()...)
+	for i := range elem.Value {
+		res = append(res, elem.Value[i][0].Encode()...)
+		res = append(res, elem.Value[i][1].Encode()...)
 	}
 	return append(res, []byte("e")...)
 }
@@ -155,7 +173,7 @@ func Decode(data []byte) (Element, int, error) {
 	case 'd':
 		return decodeDictionary(data)
 	default:
-		return nil, 0, BencodeError{ msg: "invalid format"}
+		return nil, 0, BencodeError{ msg: "inValueid format"}
 	}
 }
 
@@ -178,7 +196,7 @@ func decodeInteger(data []byte) (Integer, int, error) {
 	if err != nil {
 		return res, 0, err
 	}
-	res.val = big.NewInt(int64(v))
+	res.Value = big.NewInt(int64(v))
 	return res, e, nil
 }
 
@@ -202,9 +220,9 @@ func decodeByteString(data []byte) (ByteString, int, error) {
 		return res, 0, BencodeError{ msg: "missing data" }
 	}
 	if l == 0 {
-		res.val = []byte{}
+		res.Value = []byte{}
 	} else {
-		res.val = data[i + 1:i + l + 1]
+		res.Value = data[i + 1:i + l + 1]
 	}
 	return res, i + l, nil
 }
@@ -217,7 +235,7 @@ func decodeList(data []byte) (List, int, error) {
 		if err != nil {
 			return res, 0, err
 		}
-		res.val = append(res.val, elem)
+		res.Value = append(res.Value, elem)
 		i += e + 1
 		if i >= len(data) {
 			return res, 0, BencodeError{ msg: "missing end of list" }
@@ -243,7 +261,7 @@ func decodeDictionary(data []byte) (Dictionary, int, error) {
 			return res, 0, err
 		}
 
-		res.val = append(res.val, [2]Element { k, v })
+		res.Value = append(res.Value, [2]Element { k, v })
 		i += e + 1
 		if i >= len(data) {
 			return res, 0, BencodeError{ msg: "missing end of Dictionary" }
