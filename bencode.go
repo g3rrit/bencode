@@ -34,6 +34,10 @@ func (_ ByteString) isElement() {}
 func (_ List) isElement() {}
 func (_ Dictionary) isElement() {}
 
+//--------------------------------------------------------
+// STRINGIFY
+//--------------------------------------------------------
+
 func (elem Integer) String() string {
 	return strconv.Itoa(int(elem))
 }
@@ -68,6 +72,10 @@ func (elem Dictionary) String() string {
 	return res
 }
 
+//--------------------------------------------------------
+// ENCODING
+//--------------------------------------------------------
+
 func (elem Integer) Encode() []byte {
 	res := append([]byte("i"), []byte(elem.String())...)
 	return append(res, []byte("e")...)
@@ -95,6 +103,10 @@ func (elem Dictionary) Encode() []byte {
 	}
 	return append(res, []byte("e")...)
 }
+
+//--------------------------------------------------------
+// DECODING
+//--------------------------------------------------------
 
 func D(data []byte) (Element, error) {
 	res, _, err := Decode(data)
@@ -175,7 +187,7 @@ func decodeByteString(data []byte) (ByteString, int, error) {
 }
 
 func decodeList(data []byte) (List, int, error) {
-	var res List = List(make([]Element, 0))
+	res := List(make([]Element, 0))
 	var i int
 	for i = 1; data[i] != 'e'; {
 		elem, e, err := Decode(data[i:])
@@ -192,7 +204,7 @@ func decodeList(data []byte) (List, int, error) {
 }
 
 func decodeDictionary(data []byte) (Dictionary, int, error) {
-	var res Dictionary = Dictionary(make(map[string] Element))
+	res := Dictionary(make(map[string] Element))
 	var i int
 	for i = 1; data[i] != 'e'; {
 		k, e, err := Decode(data[i:])
